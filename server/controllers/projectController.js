@@ -2,7 +2,7 @@ const db = require("../config/db");
 
 const getProjects = async (req, res) => {
   try {
-    const [projects] = await db.promise().query(
+    const [projects] = await db.query(
       `SELECT p.*, u.name AS owner_name,
         (SELECT COUNT(*) FROM tasks t WHERE t.project_id = p.id) AS task_count
        FROM projects p
@@ -20,7 +20,7 @@ const getProjects = async (req, res) => {
 const getProject = async (req, res) => {
   const { id } = req.params;
   try {
-    const [projects] = await db.promise().query(
+    const [projects] = await db.query(
       `SELECT p.*, u.name AS owner_name FROM projects p
        JOIN users u ON u.id = p.user_id
        WHERE p.id = ? AND p.user_id = ?`,
@@ -37,11 +37,11 @@ const createProject = async (req, res) => {
   const { name, description } = req.body;
   if (!name) return res.status(400).json({ message: "Name is required." });
   try {
-    const [result] = await db.promise().query(
+    const [result] = await db.query(
       "INSERT INTO projects (name, description, user_id) VALUES (?, ?, ?)",
       [name, description || "", req.user.id]
     );
-    await db.promise().query(
+    await db.query(
       "INSERT INTO project_members (project_id, user_id, role) VALUES (?, ?, 'owner')",
       [result.insertId, req.user.id]
     );
@@ -55,12 +55,12 @@ const updateProject = async (req, res) => {
   const { id } = req.params;
   const { name, description } = req.body;
   try {
-    const [rows] = await db.promise().query(
+    const [rows] = await db.query(
       "SELECT * FROM projects WHERE id = ? AND user_id = ?",
       [id, req.user.id]
     );
     if (rows.length === 0) return res.status(403).json({ message: "Not authorized." });
-    await db.promise().query(
+    await db.query(
       "UPDATE projects SET name = ?, description = ? WHERE id = ?",
       [name, description, id]
     );
@@ -73,12 +73,12 @@ const updateProject = async (req, res) => {
 const deleteProject = async (req, res) => {
   const { id } = req.params;
   try {
-    const [rows] = await db.promise().query(
+    const [rows] = await db.query(
       "SELECT * FROM projects WHERE id = ? AND user_id = ?",
       [id, req.user.id]
     );
     if (rows.length === 0) return res.status(403).json({ message: "Not authorized." });
-    await db.promise().query("DELETE FROM projects WHERE id = ?", [id]);
+    await db.query("DELETE FROM projects WHERE id = ?", [id]);
     res.json({ message: "Project deleted." });
   } catch (err) {
     res.status(500).json({ message: "Failed to delete project." });

@@ -5,11 +5,11 @@ const jwt = require("jsonwebtoken");
 exports.register = async (req, res) => {
   const { name, email, password } = req.body;
   try {
-    const [existing] = await db.promise().query("SELECT * FROM users WHERE email = ?", [email]);
+    const [existing] = await db.query("SELECT * FROM users WHERE email = ?", [email]);
     if (existing.length > 0) return res.status(400).json({ message: "Email already exists" });
 
     const hashed = await bcrypt.hash(password, 10);
-    await db.promise().query("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", [name, email, hashed]);
+    await db.query("INSERT INTO users (name, email, password) VALUES (?, ?, ?)", [name, email, hashed]);
     res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -19,7 +19,7 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   try {
-    const [users] = await db.promise().query("SELECT * FROM users WHERE email = ?", [email]);
+    const [users] = await db.query("SELECT * FROM users WHERE email = ?", [email]);
     if (users.length === 0) return res.status(400).json({ message: "Invalid credentials" });
 
     const valid = await bcrypt.compare(password, users[0].password);

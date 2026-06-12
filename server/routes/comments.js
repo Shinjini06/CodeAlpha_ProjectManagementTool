@@ -6,7 +6,7 @@ const db = require("../config/db");
 // Get comments for a task
 router.get("/:taskId/comments", auth, async (req, res) => {
   try {
-    const [comments] = await db.promise().query(
+    const [comments] = await db.query(
       `SELECT c.*, u.name FROM comments c 
        JOIN users u ON c.user_id = u.id 
        WHERE c.task_id = ? ORDER BY c.created_at ASC`,
@@ -22,7 +22,7 @@ router.get("/:taskId/comments", auth, async (req, res) => {
 router.post("/:taskId/comments", auth, async (req, res) => {
   const { content } = req.body;
   try {
-    const [result] = await db.promise().query(
+    const [result] = await db.query(
       "INSERT INTO comments (task_id, user_id, content) VALUES (?, ?, ?)",
       [req.params.taskId, req.user.id, content]
     );
