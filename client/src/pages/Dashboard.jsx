@@ -33,7 +33,7 @@ const Dashboard = () => {
     if (!form.title.trim()) return;
     setCreating(true);
     try {
-      await api.post("/projects", form);
+      await api.post("/projects", { name: form.title, description: form.description });
       setShowModal(false);
       setForm({ title: "", description: "" });
       fetchProjects();
@@ -44,7 +44,7 @@ const Dashboard = () => {
     }
   };
 
-  const getInitials = (title) => title.slice(0, 2).toUpperCase();
+  const getInitials = (title) => (title || "??").slice(0, 2).toUpperCase();
   const colors = ["#4f46e5", "#7c3aed", "#0891b2", "#059669", "#d97706", "#dc2626"];
   const getColor = (id) => colors[id % colors.length];
 
@@ -89,14 +89,14 @@ const Dashboard = () => {
                   className="project-card-icon"
                   style={{ background: getColor(p.id) }}
                 >
-                  {getInitials(p.title)}
+                  {getInitials(p.name)}
                 </div>
                 <div className="project-card-body">
-                  <h3>{p.title}</h3>
+                  <h3>{p.name}</h3>
                   <p>{p.description || "No description"}</p>
                   <div className="project-card-meta">
                     <span>📌 {p.task_count} tasks</span>
-                    <span>👥 {p.member_count} members</span>
+                    <span>👥 1 member</span>
                   </div>
                 </div>
                 <div className="project-card-arrow">→</div>

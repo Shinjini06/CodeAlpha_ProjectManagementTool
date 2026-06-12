@@ -41,6 +41,10 @@ const createProject = async (req, res) => {
       "INSERT INTO projects (name, description, user_id) VALUES (?, ?, ?)",
       [name, description || "", req.user.id]
     );
+    await db.promise().query(
+      "INSERT INTO project_members (project_id, user_id, role) VALUES (?, ?, 'owner')",
+      [result.insertId, req.user.id]
+    );
     res.status(201).json({ id: result.insertId, name, description, user_id: req.user.id });
   } catch (err) {
     res.status(500).json({ message: "Failed to create project." });
