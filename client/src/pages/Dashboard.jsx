@@ -14,6 +14,7 @@ const Dashboard = () => {
   const [form, setForm] = useState({ title: "", description: "" });
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => { fetchProjects(); }, []);
 
@@ -41,6 +42,20 @@ const Dashboard = () => {
       setError(err.response?.data?.message || "Failed to create project.");
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleDelete = async (e, projectId, projectName) => {
+    e.stopPropagation();
+    if (!window.confirm(`Delete project "${projectName}"? This cannot be undone.`)) return;
+    setDeletingId(projectId);
+    try {
+      await api.delete(`/projects/${projectId}`);
+      setProjects((prev) => prev.filter((p) => p.id !== projectId));
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to delete project.");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -84,7 +99,23 @@ const Dashboard = () => {
                 key={p.id}
                 className="project-card"
                 onClick={() => navigate(`/project/${p.id}`)}
+                style={{ position: "relative" }}
               >
+                <button
+                  className="btn btn-ghost btn-icon"
+                  onClick={(e) => handleDelete(e, p.id, p.name)}
+                  disabled={deletingId === p.id}
+                  title="Delete project"
+                  style={{
+                    position: "absolute",
+                    top: "10px",
+                    right: "10px",
+                    fontSize: "16px",
+                    zIndex: 2,
+                  }}
+                >
+                  {deletingId === p.id ? "..." : "🗑️"}
+                </button>
                 <div
                   className="project-card-icon"
                   style={{ background: getColor(p.id) }}
